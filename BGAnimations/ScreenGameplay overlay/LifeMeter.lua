@@ -75,11 +75,15 @@ local t = Def.ActorFrame {
                 self:GetChild("BarBody"):diffusebottomedge(Color.Red)
                 self:GetChild("BarEdgeL"):diffusebottomedge(Color.Red)
                 self:GetChild("BarEdgeR"):diffusetopedge(Color.Red) -- This one is flipped :)
+				self:GetChild("Tip"):visible(0)
+				self:GetChild("Tip-Danger"):visible(1)
                 MeterDanger = true
             elseif LifeAmount > 0.33 and MeterDanger and not MeterFail then
                 self:GetChild("BarBody"):stoptweening():linear(0.5):diffusebottomedge(Color.White)
                 self:GetChild("BarEdgeL"):stoptweening():linear(0.5):diffusebottomedge(Color.White)
                 self:GetChild("BarEdgeR"):stoptweening():linear(0.5):diffusetopedge(Color.White)
+				self:GetChild("Tip"):visible(1)
+				self:GetChild("Tip-Danger"):visible(0)
                 MeterDanger = false
             end
 
@@ -120,6 +124,14 @@ local t = Def.ActorFrame {
 
 				self:GetChild("Meter"):finishtweening():x(MeterHot and 0 or -20):linear(0.1):cropright(1 - LifeAmount)
 				self:GetChild("Pulse"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * LifeAmount)) - 20)
+			end
+			
+			if LifeAmount < 1 and not MeterHot then
+				self:GetChild("Tip"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * LifeAmount)))
+				self:GetChild("Tip-Danger"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * LifeAmount)))
+			elseif LifeAmount >=1 and MeterHot then
+				self:GetChild("Tip"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * 1)))
+				self:GetChild("Tip-Danger"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * 1)))
 			end
 
             local PlayerOptions = GAMESTATE:GetPlayerState(pn):GetPlayerOptions("ModsLevel_Preferred")
@@ -224,6 +236,25 @@ local t = Def.ActorFrame {
             :texcoordvelocity(-0.5, 0)
             :diffusealpha(0)
         end
+    },
+	
+    Def.Sprite {
+        Name="Tip",
+        Texture=THEME:GetPathG("", "UI/LifeBarTip/normal-tip"),
+        InitCommand=function(self)
+            self:zoomto(60, 60)
+            self:pulse():effectmagnitude(1.0,1.25,1.0):effectclock("bgm"):effecttiming(1,0,0,0)
+        end
+    },
+
+    Def.Sprite {
+        Name="Tip-Danger",
+        Texture=THEME:GetPathG("", "UI/LifebarTip/danger-tip"),
+        InitCommand=function(self)
+			self:visible(0)
+            self:zoomto(60, 60)
+            self:pulse():effectmagnitude(1.0,1.25,1.0):effectclock("bgm"):effecttiming(1,0,0,0)
+		end
     },
 
     Def.BitmapText{
