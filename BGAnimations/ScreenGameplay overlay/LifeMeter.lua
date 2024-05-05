@@ -112,6 +112,20 @@ local t = Def.ActorFrame {
 
 				self:GetChild("ProMeter"):finishtweening():x(MeterHotPro and 0 or -20):linear(0.1):cropright(1 - ProLifeAmount)
 				self:GetChild("ProPulse"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * ProLifeAmount)) - 20)
+				
+				-- lifebar tip for the pro meter
+				-- make sure the pro tip only appears when you actually have pro lifebar available, and hide it like usual when capped
+				-- this could probably be done better but it works so whatever :V
+				if ProLifeAmount <= 0 then
+					self:GetChild("Tip-Pro"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - (0)))
+					self:GetChild("Tip-Pro"):visible(0)
+				elseif ProLifeAmount > 0 and ProLifeAmount <= 0.999 and not MeterHotPro then
+					self:GetChild("Tip-Pro"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * ProLifeAmount)))
+					self:GetChild("Tip-Pro"):visible(1)
+				elseif ProLifeAmount >=1 or MeterHotPro then
+					self:GetChild("Tip-Pro"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * 1)))
+					self:GetChild("Tip-Pro"):visible(0)
+				end
 			else
 				-- Normal lifebar shenanigans
 				if LifeAmount >= 1 and not MeterHot then
@@ -126,12 +140,23 @@ local t = Def.ActorFrame {
 				self:GetChild("Pulse"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * LifeAmount)) - 20)
 			end
 			
-			if LifeAmount < 1 and not MeterHot then
-				self:GetChild("Tip"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * LifeAmount)))
-				self:GetChild("Tip-Danger"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * LifeAmount)))
-			elseif LifeAmount >=1 and MeterHot then
+			self:GetChild("Tip"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * LifeAmount)))
+			self:GetChild("Tip-Danger"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * LifeAmount)))
+			
+			-- garbage to make sure that the lifebar actually tweens properly and doesn't just run away from the edge of the lifebar
+			-- extra tweening despite lifebar being capped out is just to ensure less jank when the lifebar exits a 'hot' state
+			if LifeAmount >=1 and MeterHot and not MeterFail then
 				self:GetChild("Tip"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * 1)))
-				self:GetChild("Tip-Danger"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * 1)))
+				self:GetChild("Tip"):visible(0)
+			end
+			
+			-- gdi i forgot about the danger/fail tip fleeing too if you lose it when failing
+			-- this took way too long to figure out for whatever reason aaaaaaaaaa
+			if LifeAmount >=1 and MeterFail then
+			    self:GetChild("Tip-Danger"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * 1)))
+				self:GetChild("Tip-Danger"):visible(0)
+		    elseif LifeAmount > 0 and LifeAmount <= 0.999 and MeterFail then
+				self:GetChild("Tip-Danger"):visible(1)
 			end
 
             local PlayerOptions = GAMESTATE:GetPlayerState(pn):GetPlayerOptions("ModsLevel_Preferred")
@@ -250,6 +275,16 @@ local t = Def.ActorFrame {
     Def.Sprite {
         Name="Tip-Danger",
         Texture=THEME:GetPathG("", "UI/LifebarTip/danger-tip"),
+        InitCommand=function(self)
+			self:visible(0)
+            self:zoomto(60, 60)
+            self:pulse():effectmagnitude(1.0,1.25,1.0):effectclock("bgm"):effecttiming(1,0,0,0)
+		end
+    },
+	
+    Def.Sprite {
+        Name="Tip-Pro",
+        Texture=THEME:GetPathG("", "UI/LifebarTip/pro-tip"),
         InitCommand=function(self)
 			self:visible(0)
             self:zoomto(60, 60)
