@@ -75,15 +75,14 @@ local t = Def.ActorFrame {
                 self:GetChild("BarBody"):diffusebottomedge(Color.Red)
                 self:GetChild("BarEdgeL"):diffusebottomedge(Color.Red)
                 self:GetChild("BarEdgeR"):diffusetopedge(Color.Red) -- This one is flipped :)
-		self:GetChild("Tip"):visible(0)
-		self:GetChild("Tip-Danger"):visible(1)
+		        self:GetChild("Tip"):visible(0)
+		        self:GetChild("Tip-Danger"):visible(1)
                 MeterDanger = true
             elseif LifeAmount > 0.33 and MeterDanger and not MeterFail then
                 self:GetChild("BarBody"):stoptweening():linear(0.5):diffusebottomedge(Color.White)
                 self:GetChild("BarEdgeL"):stoptweening():linear(0.5):diffusebottomedge(Color.White)
                 self:GetChild("BarEdgeR"):stoptweening():linear(0.5):diffusetopedge(Color.White)
-		self:GetChild("Tip"):visible(1)
-		self:GetChild("Tip-Danger"):visible(0)
+		        self:GetChild("Tip-Danger"):visible(0)
                 MeterDanger = false
             end
 
@@ -148,6 +147,8 @@ local t = Def.ActorFrame {
 			if LifeAmount >=1 and MeterHot and not MeterFail then
 				self:GetChild("Tip"):finishtweening():linear(0.1):x(-(((BarW - 12) / 2) - ((BarW - 12) * 1)))
 				self:GetChild("Tip"):visible(0)
+		    elseif LifeAmount > 0.33 and not MeterDanger and not MeterFail then
+				self:GetChild("Tip"):visible(1)
 			end
 			
 			-- gdi i forgot about the danger/fail tip fleeing too if you lose it when failing
